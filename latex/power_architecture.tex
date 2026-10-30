@@ -1,0 +1,42 @@
+\begin{circuitikz}[thick]
+
+\draw (-3,0) to[pvsource,l=Solar~Arrays] (-1,0);
+
+\draw (-1,0) to[nos,l=RBF] (1,0)
+            to[nos,l=Sep.\ Switch] (3,0);
+\coordinate (tap) at (3.5,0);
+\draw (3,0) -- (tap);
+
+\node[draw,very thick,minimum width=1.6cm,minimum height=1cm,
+      anchor=west] (pcdu1) at (4,1) {PCDU 1};
+
+\node[draw,very thick,minimum width=1.6cm,minimum height=1cm,
+      anchor=west] (pcdu2) at (4,-1) {PCDU 2};
+
+\draw (tap) -- ++(0,1) -- (pcdu1.west);
+\draw (tap) -- ++(0,-1) -- (pcdu2.west);
+\draw (pcdu1.south) -- (pcdu2.north);
+\draw (pcdu1.south) -- (pcdu2.north);
+
+\draw (pcdu1.east) -- ++(0.6,0) coordinate (o1);
+\draw (pcdu2.east) -- ++(0.6,0) coordinate (o2);
+
+\coordinate (vx) at (6,0);
+\draw (o1) -- (6,1);
+\draw (o2) -- (6,-1);
+\draw (6,1) -- (6,-1);
+\draw (6,1) node[circ]{};
+\draw (6,-1) node[circ]{};
+
+\draw[-{Triangle[length=3mm,width=3mm]}] (6,1) -- ++(1.6,0) node[right]{28V Nominal};
+\draw[-{Triangle[length=3mm,width=3mm]}] (6,-1) -- ++(1.6,0) node[right]{3V3/5V/12V};
+
+\coordinate (bstart) at ([xshift=-0.2cm]pcdu2.south);
+
+\draw (bstart) -- ++(0,-0.5) coordinate (bline)
+      -- ++(-4,0) -- ++(0,-1.5) -- ++(0.1,0) to[nos,l=RBF] ++(3,0)
+      to[nos,l=Sep.\ Switch] ++(2,0)
+      -- ++(0,0) to[battery,l=Battery] ++(2,0) -- ++(0,1.5) -- ++(-2.7,0) -- ([xshift=0.2cm]pcdu2.south);
+
+
+\end{circuitikz}

@@ -1,0 +1,250 @@
+\begin{tikzpicture}
+
+% RAILS
+% Power
+\draw[rail, red] (-0.1,0) -- (25.6,0);
+\node[labelstyle, above, red] at (24.6,0) {POWER};
+
+% Data
+\draw[rail] (-0.5,-0.4) -- (25.6,-0.4);
+\node[labelstyle, below] at (24.6,-0.4) {DATA};
+
+% AOCS
+\draw[dashed, thick] (-2.4,-1.4) rectangle (10.5,-10);
+\node[labelstyle, anchor=west] at (-2.2,-1.2) {AOCS};
+
+\node[box, minimum width=3.0cm] (gpsZ) at (-0.3,-3.2) {GPS Receiver (+Z)};
+
+\draw[red, thick] (-0.1,0) |- ([xshift=0.2cm]gpsZ.north);
+\draw[thick]      (-0.5,-0.4) |- ([xshift=-0.2cm]gpsZ.north);
+
+\node[box, minimum width=3.0cm,
+      right=-0.8cm of gpsZ,
+      yshift=-0.8cm] (gpsZm) {GPS Receiver (-Z)};
+
+\draw[red, thick] (2.2,0) |- ([xshift=0.15cm]gpsZm.north);
+
+\draw[thick]      (1.8,-0.4) |- ([xshift=-0.25cm]gpsZm.north);
+
+\node[box, minimum width=3.0cm,
+      below=1cm of gpsZ] (gpsZ_ant) {GPS Antenna (+Z)};
+
+\node[box, minimum width=3.0cm,
+      below=1cm of gpsZm] (gpsZm_ant) {GPS Antenna (-Z)};
+
+\draw[thick] (gpsZ.south) -- (gpsZ_ant.north);
+\draw[thick] (gpsZm.south) -- (gpsZm_ant.north);
+
+\coordinate (aocsNE) at (8.5,-1.4);
+\node[box, align=center, minimum width=3.2cm] (aocs)
+  at ($(aocsNE)+(0cm,-1.0cm)$) {AOCS Controller\\(Incl.\ IMU)};
+
+\draw[red, thick] (8.7,0) |- ([xshift=0.2cm]aocs.north);   % POWER
+\draw[thick]      (8.3,-0.4) |- ([xshift=-0.2cm]aocs.north); % DATA
+
+% Attitude Sensors
+\node[box, minimum width=3.2cm] (mag)  at (6.1,-4) {Magnetometer};
+\node[box, minimum width=3.2cm] (sun)  at (6.1,-5) {2x Sun Sensors};
+\node[box, minimum width=3.2cm] (star) at (6.1,-6) {2x Star Trackers};
+
+\draw[dashed, thick] (3.95,-3.5) rectangle (7.9,-6.5);
+\node[labelstyle, anchor=west] at (4.0,-3.3) {Attitude Sensors};
+
+% ACTUATORS
+\node[box, minimum width=3.2cm] (rw)  at (6.1,-7.8) {4x Reaction Wheels};
+\node[box, minimum width=3.2cm] (mtq) at (6.1,-8.9) {3x Magnetorquers};
+
+\draw[dashed, thick] (3.95,-7.3) rectangle (7.9,-9.4);
+\node[labelstyle, anchor=west] at (4.0,-7.1) {Actuators};
+
+\draw[thick] ([xshift=-0.2cm]aocs.south) -- ([xshift=-0.2cm, yshift=-0.1cm]aocs.south |- mtq.east) -- ([yshift=-0.1cm]mtq.east);
+\draw[red, thick] ([xshift=0.2cm]aocs.south) -- ([xshift=0.2cm, yshift=0.1cm]aocs.south |- mtq.east) -- ([yshift=0.1cm]mtq.east);
+
+\draw[thick] ([xshift=-0.2cm]aocs.south) -- ([xshift=-0.2cm, yshift=-0.1cm]aocs.south |- rw.east) -- ([yshift=-0.1cm]rw.east);
+\draw[red, thick] ([xshift=0.2cm]aocs.south) -- ([xshift=0.2cm, yshift=0.1cm]aocs.south |- rw.east) -- ([yshift=0.1cm]rw.east);
+
+\draw[thick] ([xshift=-0.2cm]aocs.south) -- ([xshift=-0.2cm, yshift=-0.1cm]aocs.south |- star.east) -- ([yshift=-0.1cm]star.east);
+\draw[red, thick] ([xshift=0.2cm]aocs.south) -- ([xshift=0.2cm, yshift=0.1cm]aocs.south |- star.east) -- ([yshift=0.1cm]star.east);
+
+\draw[thick] ([xshift=-0.2cm]aocs.south) -- ([xshift=-0.2cm, yshift=-0.1cm]aocs.south |- sun.east) -- ([yshift=-0.1cm]sun.east);
+\draw[red, thick] ([xshift=0.2cm]aocs.south) -- ([xshift=0.2cm, yshift=0.1cm]aocs.south |- sun.east) -- ([yshift=0.1cm]sun.east);
+
+\draw[thick] ([xshift=-0.2cm]aocs.south) -- ([xshift=-0.2cm, yshift=-0.1cm]aocs.south |- mag.east) -- ([yshift=-0.1cm]mag.east);
+\draw[red, thick] ([xshift=0.2cm]aocs.south) -- ([xshift=0.2cm, yshift=0.1cm]aocs.south |- mag.east) -- ([yshift=0.1cm]mag.east);
+
+
+% COMMS/OBDH
+\draw[dashed, thick] (10.8,-1.4) rectangle (20.7,-10);
+\node[labelstyle, anchor=west] at (11.8,-1.2) {COMMS/OBDH};
+
+\node[box, minimum width=1.2cm] (obc) at (16.4,-2.3) {OBC};
+
+\draw[red, thick]  (16.6,0)    |- ([xshift=0.2cm]obc.north);
+\draw[thick]       (16.2,-0.4) |- ([xshift=-0.2cm]obc.north);
+
+\node[box, minimum width=3.2cm] (uhfZ) at (13.4,-4.0) {UHF Transceiver (+Z)};
+\node[box, minimum width=3.2cm, below=0.8cm of uhfZ] (uhfZ_ant) {UHF Antenna (+Z)};
+\draw[thick] (obc.west) -- (obc.west -| uhfZ.north) -- (uhfZ.north);
+\draw[thick] (uhfZ.south) -- (uhfZ_ant.north);
+
+\node[box, minimum width=3.2cm, below=2.0cm of uhfZ_ant] (uhfM) {UHF Transceiver (–Z)};
+\node[box, minimum width=3.2cm, below=0.8cm of uhfM] (uhfM_ant) {UHF Antenna (–Z)};
+\draw[thick] ([xshift=-0.2cm]obc.south) -- ++(0,-3.5) -- ++(-2.8,0) -- (uhfM.north);
+\draw[thick] (uhfM.south) -- (uhfM_ant.north);
+
+\draw[red, thick] (11.15,0) |- (uhfZ.west);
+\draw[red, thick] (11.15,0) |- (uhfM.west);
+
+\node[box, minimum width=3.2cm] (sband) at (18.1,-4.0) {S-band Transceiver};
+\node[box, minimum width=1.8cm, below=1.0cm of sband] (sws) {Switch};
+
+\node[box, align=center, minimum width=2.0cm, below=0.8cm of sws, xshift=-1.25cm] (santYp) {S-band\\Antenna (+Y)};
+\node[box, align=center, minimum width=2.0cm, below=0.8cm of sws, xshift= 1.25cm] (santYn) {S-band\\Antenna (-Y)};
+
+\draw[thick] ([xshift=0.2cm]obc.south) -- ++(0,-0.6) -- ([yshift=-0.6cm]obc.south -| sband.north) -- (sband.north);
+\draw[thick] (sband.south) -- (sws.north);
+\coordinate (sbsplit) at ($(sws.south)+(0,-0.6)$);
+\draw[thick] (sws.south) -- (sbsplit);
+\draw[thick] (sbsplit) -| (santYp.north);
+\draw[thick] (sbsplit) -| (santYn.north);
+\draw[red, thick] (20.0,0) |- (sband.east);
+
+% THERMAL
+\draw[dashed, thick] (21,-1.4) rectangle (24.2,-3.6);
+\node[labelstyle, anchor=west] at (21,-1.2) {THERMAL};
+
+\node[box, minimum width=2.1cm] (heat) at (22.2,-2) {Heaters};
+\fill[orange] (21.3,-3) circle (0.1);
+\node[anchor=west] at (21.4,-3) {Thermistors};
+
+\draw[thick] (23.6,-0.4) |- ([yshift=-0.1cm]heat.east);
+\draw[red, thick] (24,0) |- ([yshift=0.1cm]heat.east);
+
+% POWER
+\draw[dashed, thick] (-2.4,0.6) rectangle (7.5,7.5);
+\node[labelstyle, anchor=west] at (-2.2,7.7) {POWER};
+
+\node[box, align=center, minimum width=2cm] (pcdu) at (3.5,1.5) {Primary +\\Redundant\\PCDU};
+\node[box, align=center, minimum width=2cm] (smech) at (3.5,6) {Solar Panel\\Deployment\\Mechanism};
+\node[box, align=center, minimum width=3.2cm] (batt) at (-0.3,1.5) {Battery Pack};
+\node[box, align=center, minimum width=3.2cm] (fixedpanel) at (-0.3,3) {Fixed Deployable\\Solar Panels};
+\node[box, align=center, minimum width=2.5cm] (rbf) at (5.7,4.5) {Remove-\\Before-Flight};
+\node[box, align=center, minimum width=2.5cm] (sepswitch) at (5.7,3) {Separation\\Switch};
+\node[box, align=center, minimum width=3.2cm] (bodypanel) at (-0.3,4.5) {Body Mounted\\Solar Panels};
+
+\draw[thick] (3.7,-0.4) |- ([xshift=0.2cm]pcdu.south);
+\draw[red, thick] (3.3,0) |- ([xshift=-0.2cm]pcdu.south);
+\draw[red, thick] (batt.east) |- (pcdu.west);
+\draw[red, thick] ([xshift=-0.2cm]pcdu.north) |- (fixedpanel.east);
+\draw[red, thick] ([xshift=-0.2cm]pcdu.north) |- (bodypanel.east);
+\draw[red, thick] (pcdu.north) |- (smech.south);
+\draw[thick] ([xshift=0.2cm]pcdu.north) |- (rbf.west);
+\draw[thick] ([xshift=0.2cm]pcdu.north) |- (sepswitch.west);
+
+
+% PAYLOAD
+\draw[dashed, thick] (7.8,0.6) rectangle (14.8,7.5);
+\node[labelstyle, anchor=west] at (8.3,7.7) {PAYLOAD};
+
+\node[box, align=center, minimum width=2.8cm] (cvd) at (11,1.5) {Space Forge\\CVD Payload};
+
+\draw[dashed, thick] (8.1,3.6) rectangle (12.2,6.6);
+\node[labelstyle, anchor=west] at (8.7,6.75) {Secondary Payloads};
+
+\node[box, align=center, minimum width=3.3cm] (selfie) at (10.4,6) {Satellite Selfie\\Camera};
+\node[box, align=center, minimum width=3.3cm] (press)  at (10.4,5) {Pressure Sensor};
+\node[box, align=center, minimum width=3.3cm] (micro)  at (10.4,4.0) {Microgravity Sensor};
+
+\draw[red, thick]  (14,0) |- ([yshift=0.1cm]selfie.east);
+\draw[thick]       (14.4,-0.4) |- ([yshift=-0.1cm]selfie.east);
+\draw[red, thick]  (14,0) |- ([yshift=0.1cm]press.east);
+\draw[thick]       (14.4,-0.4) |- ([yshift=-0.1cm]press.east);
+\draw[red, thick]  (14.0,0) |- ([yshift=0.1cm]micro.east);
+\draw[thick]       (14.4,-0.4) |- ([yshift=-0.1cm]micro.east);
+
+\draw[red, thick] (10.8,0) -- ([xshift=-0.2cm]cvd.south);
+\draw[thick]      (11.2,-0.4) -- ([xshift=0.2cm]cvd.south);
+
+% PROPULSION
+\draw[dashed, thick] (15.1,0.6) rectangle (23,8.5);
+\node[labelstyle, anchor=west] at (15.3,8.7) {PROPULSION};
+
+\node[box, align=center, minimum width=2.2cm] (pt1) at (17.3,6.4) {Pressure\\Transducer};
+\node[box, align=center, minimum width=2.2cm] (pt2) at (17.3,4.8) {Pressure\\Transducer};
+\node[box, align=center, minimum width=2.2cm] (pt3) at (17.3,2.4) {Pressure\\Transducer};
+
+\node[box, align=center, minimum width=2.4cm] (thruster) at (20.2,8) {5N Thruster};
+\node[box, align=center, minimum width=2.0cm] (valve1)   at (20.2,7) {Valve};
+\node[box, align=center, minimum width=2.6cm] (ptank)    at (20.2,5.6) {Propellant\\Tank (N\textsubscript{2}H\textsubscript{4})};
+\node[box, align=center, minimum width=2.4cm] (reg)      at (20.2,4) {Pressure\\Regulator};
+\node[box, align=center, minimum width=2.0cm] (valve2)   at (20.2,3) {Valve};
+\node[box, align=center, minimum width=2.6cm] (pstr)     at (20.2,1.4) {Pressurant\\Tank (GN\textsubscript{2})};
+
+\draw[thick] (15.8,-0.4) |- ([yshift=0.1cm]pt1.west);
+\draw[red, thick] (15.4,0) |- ([yshift=-0.1cm]pt1.west);
+\draw[thick] (15.8,-0.4) |- ([yshift=0.1cm]pt2.west);
+\draw[red, thick] (15.4,0) |- ([yshift=-0.1cm]pt2.west);
+\draw[thick] (15.8,-0.4) |- ([yshift=0.1cm]pt3.west);
+\draw[red, thick] (15.4,0) |- ([yshift=-0.1cm]pt3.west);
+
+\draw[red, thick] (22.6,0) |- (thruster.east);
+\draw[red, thick] (22.6,0) |- (valve1.east);
+\draw[red, thick] (22.6,0) |- (valve2.east);
+
+\draw[blue, thick] (thruster.south) -- (valve1.north);
+\draw[blue, thick] (valve1.south) -- (ptank.north);
+\draw[blue, thick] (ptank.south) -- (reg.north);
+\draw[blue, thick] (reg.south) -- (valve2.north);
+\draw[blue, thick] (valve2.south) -- (pstr.north);
+
+\draw[blue, thick] (ptank.north) |- (pt1.east);
+\draw[blue, thick] (reg.north)   |- (pt2.east);
+\draw[blue, thick] (pstr.north)  |- (pt3.east);
+
+\node[labelstyle, blue, anchor=west] at (20.2,2.4) {PROPELLANT};
+
+% ORANGE THERMISTOR DOTS
+
+% AOCS
+\fill[orange] ([xshift=-0.25cm]gpsZ.west)     circle (0.1);
+\fill[orange] ([xshift=-0.25cm]gpsZm.west)    circle (0.1);
+
+\fill[orange] ([xshift=-0.25cm]mag.west)  circle (0.1);
+\fill[orange] ([xshift=-0.25cm]sun.west)  circle (0.1);
+\fill[orange] ([xshift=-0.25cm]star.west) circle (0.1);
+
+\fill[orange] ([xshift=-0.25cm]rw.west)   circle (0.1);
+\fill[orange] ([xshift=-0.25cm]mtq.west)  circle (0.1);
+
+\fill[orange] ([xshift=-0.25cm]aocs.west) circle (0.1);
+
+% COMMS/OBDH
+\fill[orange] ([xshift= 0.25cm]obc.east)  circle (0.1);
+
+\fill[orange] ([xshift= 0.25cm]uhfZ.east) circle (0.1);
+\fill[orange] ([xshift= 0.25cm]uhfM.east) circle (0.1);
+
+\fill[orange] ([xshift= 0.25cm, yshift= 0.25cm]sband.north) circle (0.1);
+
+
+
+% POWER
+\fill[orange] ([xshift=-0.25cm]fixedpanel.west) circle (0.1);
+\fill[orange] ([xshift=-0.25cm]bodypanel.west)  circle (0.1);
+\fill[orange] ([xshift= 0.25cm]pcdu.east)       circle (0.1);
+\fill[orange] ([xshift=-0.25cm]batt.west)       circle (0.1);
+
+% PAYLOAD
+\fill[orange] ([xshift=-0.25cm]cvd.west)    circle (0.1);
+\fill[orange] ([xshift=-0.25cm]selfie.west) circle (0.1);
+\fill[orange] ([xshift=-0.25cm]press.west)  circle (0.1);
+\fill[orange] ([xshift=-0.25cm]micro.west)  circle (0.1);
+
+% PROPULSION
+\fill[orange] ([xshift=-0.25cm]thruster.west) circle (0.1);
+\fill[orange] ([xshift= -0.25cm]ptank.west)    circle (0.1);
+\fill[orange] ([xshift= -0.25cm]pstr.west)     circle (0.1);
+
+
+
+\end{tikzpicture}

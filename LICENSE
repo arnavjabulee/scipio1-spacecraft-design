@@ -1,0 +1,32 @@
+# Licensing
+
+Copyright (c) 2025-2026 SS4 SerenSpace contributors.
+
+Project-owned code in `matlab/` and `scripts/` is licensed under the MIT
+License; see `LICENSE-CODE` for the complete terms.
+
+The original report text, original figures, report source and project
+documentation are licensed under Creative Commons Attribution 4.0
+International (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+Legal code: https://creativecommons.org/licenses/by/4.0/legalcode.en
+
+Suggested attribution:
+SS4 SerenSpace, "AVDASI 2025 Space Group 4 Final Engineering Design Report:
+SCIPIO-1", University of Bristol, 2025. Public-release revision, 2026.
+Retain the report's individual author credits, cite the source, link to the
+CC BY 4.0 licence and identify modifications.
+
+The project owner confirmed contributor permission for this publication
+and these licence choices on 30 October 2026.
+
+Third-party material is excluded from these licence grants. In particular:
+- `latex/IEEEtran.cls` and `latex/IEEEtran_HOWTO.pdf` retain their upstream
+  licences and notices.
+- University and mission branding, supplier diagrams, product images,
+  maps and other externally sourced figures retain their owners' rights.
+- Bibliographic metadata and cited works do not confer rights in those works.
+
+The report's citations and existing notices provide source attribution.
+Where an individual figure's ownership is uncertain, do not assume the
+project's CC BY 4.0 licence covers it. No trademark rights are granted.

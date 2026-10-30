@@ -1,0 +1,53 @@
+\tikzset{
+  block/.style={draw, thick, minimum width=30mm, minimum height=11mm, align=center},
+  sum/.style  ={circle, draw, thick, inner sep=0pt, minimum size=6mm},
+  line/.style ={-Latex, thick},
+  small/.style={font=\footnotesize}
+}
+
+\begin{tikzpicture}[x=1mm,y=1mm]
+
+\node[block] (mode)  at (0,0)                 {Mode Manager};
+\node[block] (guid)  at (45,0)                {Guidance\\\small $q_{ref},\,\omega_{ref}$};
+\node[sum]   (sum1)  at (80,0)                {}; 
+\node[block] (ctrl)  at (125,0)               {Controller\\\small PD / LQR};
+\node[block] (alloc) at (165,0)               {Actuator Allocation};
+
+\node[block] (plant) at (215,0)               {S/C Dynamics\\\small $J\dot\omega = \tau_{\text{cmd}} + \tau_{\text{dist}} - \omega \times J\omega$};
+\node[block] (dist)  at (215,22)              {Disturbances\\\small $T_{gg}, T_{drag}, T_{SRP}, T_{mag}$};
+
+\node[block] (sens)  at (215,-26)             {Sensors \& Noise\\\small ST / SS / IMU / MTM / GNSS};
+\node[block] (est)   at (165,-26)             {Estimator (EKF/UKF)\\\small $\hat q,\,\hat\omega,\,\hat b_g$};
+
+\node[block] (sel)   at (165,-50)             {Sensor Selection};
+\node[block] (mom)   at (125,-15)             {Momentum\\Management};
+
+\draw[line] (mode.east)  -- (guid.west);
+\draw[line] (guid.east)  -- (sum1.west);
+\draw[line] (sum1.east)  -- node[above,small] {$e_q,\,e_\omega$} (ctrl.west);
+\draw[line] (ctrl.east)  -- (alloc.west);
+\draw[line] (alloc.east) -- node[above,small] {$\tau_{\text{cmd}}$} (plant.west);
+
+\draw[line] (dist.south) -- (plant.north);
+
+\draw[line] (plant.south) -- (sens.north);
+\draw[line] (sens.west)   -- (est.east);
+
+\draw[line] (est.south) -- (sel.north);
+\draw[line] (ctrl.south) -- (mom.north);
+
+\coordinate (fb_left) at (est.west -| sum1.south);
+\coordinate (mom_right) at (mom.east -| alloc.south);
+\coordinate (mode_up) at ($(mode.north)+(0,10)$);
+\coordinate (mode_down) at (mode.south |- sel.west);
+
+\draw[line] (est.west) -- (fb_left) -- (sum1.south);
+\draw[line] (mom.east) -- (mom_right) -- (alloc.south);
+\draw[line] (mode.north) -- (mode_up) -- (mode_up -| ctrl.north) -- (ctrl.north);
+\draw[line] (mode.north) -- (mode_up) -- (mode_up -| alloc.north) -- (alloc.north);
+\draw[line] (mode.south) -- (mode_down) -- (sel.west);
+
+\node[small] at ($(sum1.south)+(3,-3)$) {$-$};
+\node[small] at ($(sum1.west)+(-3,3)$) {$+$};
+
+\end{tikzpicture}

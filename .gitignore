@@ -1,0 +1,47 @@
+# MATLAB editor and generated workspace files
+*.asv
+*.m~
+*.mex*
+matlab_check.log
+outputs/
+output/
+tmp/
+matlab_crash_dump*
+*.slxc
+slprj/
+
+# LaTeX generated files; PDF drawings in figures remain tracked
+latex/build/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.synctex.gz
+*.run.xml
+*.bcf
+*.dpth
+*.md5
+latex/main.pdf
+latex/main-figure*
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*~
+
+# Local unredacted formatting reference
+latex/main_original.tex
+
+# Local cleanup records and logs
+/CLEANUP_NOTES.md
+/FILE_RENAMES.md
+/cleanup_audit*.json
+logs/
+*.log.*
