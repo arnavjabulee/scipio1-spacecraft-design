@@ -40,7 +40,7 @@ run_analysis('smoke'); % all scripts, two Monte Carlo runs per study
 % run_analysis('full'); % original run counts; substantially slower
 ```
 
-The runner saves figures, workspaces, executed source, hashes and environment information in `outputs/matlab/`. All 12 analyses passed the smoke check on MATLAB R2025b. See `ANALYSIS_PROVENANCE.md` for the 510/520 km distinction and the limits of the archived figures. The original report is a historical design document; the companion analysis notes identify the metric mismatch in the saved Monte Carlo plot.
+The runner saves figures, workspaces, executed source, hashes and environment information in `outputs/matlab/`. All 12 analyses passed the smoke check on MATLAB R2025b. See `ANALYSIS_PROVENANCE.md` for the 510/520 km distinction and the limits of the archived figures.
 
 ## Building the report
 
@@ -51,9 +51,3 @@ Use TeX Live or MiKTeX with the packages declared in `latex/main.tex`, plus BibT
 # MiKTeX only: permit missing package installation when necessary
 ./scripts/build_report.ps1 -InstallMissingPackages
 ```
-
-The script resolves the bibliography and cross-references, and writes `output/pdf/scipio1_design_report.pdf`. Build files remain in `latex/build`. Shell escape is no longer required. The report was built locally. The report retains its original formatting, including Tables 9 and 10 side by side. Page flow from Thermal through Summary uses compact spacing and flexible table placement to avoid stretched gaps. The group photo is included from `latex/figures/group_photo.png` in its original full-width position. On other systems, run `pdflatex -output-directory=build main.tex`, `bibtex build/main`, then two more pdflatex passes from `latex` (create `build` first).
-
-## Licence and attribution
-
-Contributor permission was confirmed for publication. Project-owned code is [MIT licensed](LICENSE-CODE); original report content and project documentation use [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). See [LICENSE](LICENSE) for scope, attribution and third-party exclusions. The original author credits and upstream IEEEtran notices remain.
