@@ -21,7 +21,7 @@ addpath('matlab');
 manifest = run_analysis('smoke');
 ```
 
-This runs all 12 original analyses, reduces only `N_runs` to 2 in temporary execution copies, seeds the RNG and saves figures, workspaces and a JSON manifest under `outputs/matlab/smoke`. A smoke run establishes that code executes; two samples cannot establish Monte Carlo convergence or requirement compliance.
+This discovers the 12 original analyses plus the added LQR/Kalman example, reduces only `N_runs` to 2 in temporary execution copies, seeds the RNG and saves figures, workspaces and a JSON manifest under `outputs/matlab/smoke`. A smoke run establishes that code executes; two samples cannot establish Monte Carlo convergence or requirement compliance.
 
 ```matlab
 manifest = run_analysis('full');
@@ -32,3 +32,11 @@ Full mode uses the released scripts' unmodified run counts. The scripts clear th
 MATLAB R2025b passed all 12 smoke executions on 30 October 2026. Full Monte Carlo studies have not been rerun for this release. The minimum MATLAB release and minimal toolbox set are not yet established; the manifest records the environment actually tested.
 
 Re-establishing final-design compliance requires a separately reviewed model configuration at 520 km, agreed actuator/inertia inputs, a defined payload acceleration metric and an adequately sized convergence study. The archived figures have been preserved rather than presented as newly verified results.
+
+## Added LQR/Kalman example
+
+`sun_tracking_lqr_kalman_simulation.m` is a new development example, not a recovered source for the report's archived figures. It retains the single-run PD plant's parameters, uses a consistent scalar-first quaternion/inertial-to-body DCM convention, and starts with a small deliberate attitude/rate offset. Historical scripts were not changed to match it.
+
+Its feedback design is a six-state small-angle periodic magnetic LQR; estimation is a linear Kalman filter using synthetic full three-axis attitude and gyro measurements. A sun vector alone would not supply these full-attitude measurements. The nonlinear truth plant, input saturation and the linear estimator are separate. Optional nominal disturbance preview is enabled by default and assumes a known deterministic reference-orbit torque model. The filter's modeled covariance is not proof of statistical consistency under nonlinear model mismatch.
+
+The example leaves multi-degree periodic pointing errors under the default disturbances. A stable unsaturated linear periodic model does not establish nonlinear stability, saturated stability, pointing compliance or microgravity compliance. This file does not calculate the offset-payload microgravity metric. `scripts/validate_lqr_kalman.m` records the numerical checks and outputs; gains and noise assumptions still require mission-specific validation.
