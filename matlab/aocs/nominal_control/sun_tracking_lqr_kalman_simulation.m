@@ -9,7 +9,7 @@
 % Sensors: synthetic three-axis star-tracker attitude-error measurements and
 % three-axis gyro rates, available every sample, independent zero-mean noise.
 % This is NOT a sun-vector-only observer, an EKF, or an outage/bias model.
-% The linear Kalman filter has fixed A/H and a scheduled input matrix B(k).
+% The linear Kalman filter uses reference-orbit schedules A(k), B(k) and fixed H.
 % A periodic Riccati recursion accounts for the rank-two magnetic actuator;
 % an instantaneous frozen-field three-axis LQR would not be stabilizable.
 % All Riccati/filter steps use base MATLAB; no Control System Toolbox needed.
@@ -61,30 +61,52 @@ q_ref = dcm_to_quat(C_ref);
 assert(norm(quat_to_dcm(q_ref)-C_ref,'fro') < 1e-12, ...
     'Quaternion/DCM convention mismatch.');
 
-%% Discrete small-angle state-space model and periodic magnetic input
-% theta_dot = omega, J*omega_dot = -skew(B_ref(k))*m + torque_disturbance.
-% Gyroscopic and attitude-dependent disturbance terms are neglected in the
-% LINEAR design, but retained in the NONLINEAR truth propagation below.
-A = [eye(3) dt*eye(3); zeros(3) eye(3)];
-G_torque = [0.5*dt^2*(p.J\eye(3)); dt*(p.J\eye(3))];
-H = eye(6);
+%% Periodic small-angle state-space model and magnetic input
+% Linearize environmental torques about the known reference orbit/attitude.
+% A_c(k)=[0 I; J^-1*d(tau_dist)/d(theta) 0],
+% B_c(k)=[0; -J^-1*skew(B_ref(k))], d_c(k)=[0; J^-1*tau_ref(k)].
+% Gyroscopic terms vanish at zero reference rate. Truth keeps all nonlinear
+% terms. This is an offline scheduled LINEAR model, not state-based EKF
+% relinearization. Exact frozen-coefficient ZOH uses one augmented expm.
+A = zeros(6,6,samples_per_orbit);
 B = zeros(6,3,samples_per_orbit);
 B_reference = zeros(3,samples_per_orbit);
 nominal_disturbance_step = zeros(6,samples_per_orbit);
+G_torque = [0.5*dt^2*(p.J\eye(3)); dt*(p.J\eye(3))];
+H = eye(6);
 for k = 1:samples_per_orbit
-    [r,~] = orbit_state((k-1)*dt,p);
-    B_reference(:,k) = C_ref*earth_dipole_B(r);
-    B(:,:,k) = G_torque*(-skew(B_reference(:,k)));
-    [nominal_torque,~] = environment((k-1)*dt,C_ref,p);
-    nominal_disturbance_step(:,k) = G_torque*nominal_torque;
+    reference_time = (k-1)*dt;
+    [nominal_torque,B_reference(:,k)] = environment(reference_time,C_ref,p);
+    torque_jacobian = zeros(3);
+    perturbation_size = 1e-5; % radians; central difference about reference
+    for axis_index = 1:3
+        perturbation = zeros(3,1);
+        perturbation(axis_index) = perturbation_size;
+        torque_plus = environment(reference_time, ...
+            expm(-skew(perturbation))*C_ref,p);
+        torque_minus = environment(reference_time, ...
+            expm(skew(perturbation))*C_ref,p);
+        torque_jacobian(:,axis_index) = ...
+            (torque_plus-torque_minus)/(2*perturbation_size);
+    end
+    A_continuous = [zeros(3) eye(3);p.J\torque_jacobian zeros(3)];
+    B_continuous = [zeros(3);-(p.J\skew(B_reference(:,k)))];
+    d_continuous = [zeros(3,1);p.J\nominal_torque];
+    transition = expm([A_continuous B_continuous d_continuous;zeros(4,10)]*dt);
+    A(:,:,k) = transition(1:6,1:6);
+    B(:,:,k) = transition(1:6,7:9);
+    nominal_disturbance_step(:,k) = transition(1:6,10);
 end
 
-% Bryson-style starting weights, not fitted flight gains. Input is magnetic
-% dipole [A m^2], not an unconstrained three-axis torque command.
+% Tuned for Sun-axis pointing on the common PD benchmark. A softer roll
+% penalty reflects that roll about the Sun axis is not the primary objective.
+% Increasing the input penalty avoids the original example's excessive
+% dipole effort. The physical plant, initial attitude and limits are unchanged.
 attitude_scale = deg2rad(1);
 rate_scale = deg2rad(0.05);
-dipole_scale = 5;
-Q_lqr = diag([ones(1,3)/attitude_scale^2,ones(1,3)/rate_scale^2]);
+roll_weight = 0.125;
+dipole_scale = 0.25;
+Q_lqr = diag([[roll_weight 1 1]/attitude_scale^2,ones(1,3)/rate_scale^2]);
 R_lqr = eye(3)/dipole_scale^2;
 [K_lqr,P_next_schedule,riccati_info] = periodic_lqr(A,B,Q_lqr,R_lqr);
 assert(riccati_info.spectral_radius < 1, ...
@@ -172,9 +194,9 @@ for k = 1:Nt
         % field; the linear filter uses the reference-field input schedule.
         truth = rk4_step(t(k),truth,dt,m_applied,p);
         truth(1:4) = truth(1:4)/norm(truth(1:4));
-        x_prior = A*x_posterior+B(:,:,phase)*m_applied ...
+        x_prior = A(:,:,phase)*x_posterior+B(:,:,phase)*m_applied ...
             +nominal_disturbance_step(:,phase);
-        P_prior = A*P_posterior*A.'+Q_kf;
+        P_prior = A(:,:,phase)*P_posterior*A(:,:,phase).'+Q_kf;
         P_prior = 0.5*(P_prior+P_prior.');
     end
 end
@@ -266,7 +288,7 @@ sgtitle('Linear KF attitude error and modeled +/-3 sigma');
 
 %% Local functions
 function [gains,P_schedule,info] = periodic_lqr(A,B,Q,R)
-    % Solve P(k)=Q+A'P(k+1)A-A'P(k+1)B K(k), P(N+1)=P(1).
+    % Periodic Riccati recursion with A(k), B(k), P(N+1)=P(1).
     count = size(B,3); gains = zeros(3,6,count); boundary = Q;
     P_schedule = zeros(6,6,count);
     tolerance = 1e-10; max_iterations = 100;
@@ -275,8 +297,8 @@ function [gains,P_schedule,info] = periodic_lqr(A,B,Q,R)
         for phase = count:-1:1
             input = B(:,:,phase);
             P_schedule(:,:,phase) = P_next;
-            gain = (R+input.'*P_next*input)\(input.'*P_next*A);
-            closed_loop = A-input*gain;
+            gain = (R+input.'*P_next*input)\(input.'*P_next*A(:,:,phase));
+            closed_loop = A(:,:,phase)-input*gain;
             % Equivalent Riccati form, avoiding subtractive cancellation.
             P_now = Q+gain.'*R*gain+closed_loop.'*P_next*closed_loop;
             P_now = 0.5*(P_now+P_now.');
@@ -290,7 +312,7 @@ function [gains,P_schedule,info] = periodic_lqr(A,B,Q,R)
     assert(residual<tolerance,'Periodic LQR Riccati iteration did not converge.');
     monodromy = eye(6);
     for phase = 1:count
-        monodromy = (A-B(:,:,phase)*gains(:,:,phase))*monodromy;
+        monodromy = (A(:,:,phase)-B(:,:,phase)*gains(:,:,phase))*monodromy;
     end
     info.iterations = sweep;
     info.relative_residual = residual;
@@ -311,7 +333,7 @@ function [feedforward,disturbance] = periodic_feedforward( ...
             input = B(:,:,phase); P_next = P_schedule(:,:,phase);
             offset = P_next*disturbance(:,phase)+linear_next;
             feedforward(:,phase) = -(R+input.'*P_next*input)\(input.'*offset);
-            linear_next = (A-input*K(:,:,phase)).'*offset;
+            linear_next = (A(:,:,phase)-input*K(:,:,phase)).'*offset;
         end
         residual = norm(linear_next-boundary)/max(1,norm(linear_next));
         boundary = linear_next;

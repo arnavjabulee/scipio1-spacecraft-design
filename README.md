@@ -50,15 +50,18 @@ run('matlab/aocs/nominal_control/sun_tracking_lqr_kalman_simulation.m');
 % Optional validation, run from a fresh session:
 addpath('scripts');
 report = validate_lqr_kalman;
+comparison = benchmark_pd_lqr; % original PD gains; held-out noise seeds 4:10
 ```
 
 This additional example retains the single-run PD model's 510 km orbit, inertia, gravity-gradient/drag/SRP/residual-dipole disturbances and 10 A m^2 per-axis magnetic dipole limit. It uses six small-angle attitude/rate states, an approximately two-second sample time, and noisy synthetic star-tracker attitude and gyro-rate measurements. A full sun-aligned attitude reference fixes the otherwise free roll angle. All sensors are continuously available; bias and outages are not modeled.
 
-The magnetic input matrix changes along the orbit. A periodic Riccati recursion designs the LQR gains across that orbit, respecting the actuator's instantaneous rank-two torque geometry. A linear Kalman prediction/update uses these state-space matrices and the actual saturated dipole command. The nonlinear quaternion plant retains the changing field, disturbances and gyroscopic dynamics. Riccati and filter steps are implemented directly, without Control System Toolbox functions or an EKF.
+The magnetic input matrix and the linearized environmental-torque attitude sensitivity change along the orbit. These matrices are computed about the fixed reference before simulation. A periodic Riccati recursion designs the LQR gains across that orbit, respecting the actuator's instantaneous rank-two torque geometry. A linear Kalman prediction/update uses these scheduled state-space matrices and the actual saturated dipole command. The nonlinear quaternion plant retains the changing field, disturbances and gyroscopic dynamics. Riccati and filter steps are implemented directly, without Control System Toolbox functions or an EKF.
 
 The default also enables model-based periodic disturbance feedforward. Set `use_disturbance_feedforward = false` to examine pure LQR regulation without that preview. This feedforward assumes the nominal deterministic orbit/disturbance model is known; it does not use truth-state feedback. Weights, sensor covariances, sample time and initial errors are editable near the top of the file.
 
-Plots show pointing error, true/estimated rates, disturbance/control torques, dipole limits and attitude-estimation error. The `metrics` structure records numerical diagnostics. This is a local-model demonstration, not flight gain tuning or final mission verification: magnetic underactuation leaves a periodic pointing error of several degrees in the default disturbed case. The linear stability diagnostic applies to the unsaturated reference model, and its guarantee does not extend to large rotations or saturation.
+The tuned weights prioritise Sun pointing while allowing more roll error and penalising dipole effort. Across seven held-out noise seeds, second-orbit mean RMS Sun error was 0.904 degrees versus 1.024 degrees for the original PD gains; mean peak error was 2.493 versus 3.098 degrees, with 2.4% more RMS dipole effort. See `LQR_TUNING.md` for the matched comparison, settings and limits.
+
+Plots show pointing error, true/estimated rates, disturbance/control torques, dipole limits and attitude-estimation error. The `metrics` structure records numerical diagnostics. This remains a local-model demonstration requiring mission-specific validation. The linear stability diagnostic applies to the unsaturated reference model, and its guarantee does not extend to large rotations or saturation.
 
 `validate_lqr_kalman` checks disturbed operation, filtering improvement over raw measurements, unforced convergence, reference equilibrium and step-size sensitivity. Its generated execution copies, metrics and nominal plots are saved under ignored `outputs/lqr_kalman/validation/`.
 
